@@ -1,0 +1,29 @@
+# Essential
+.git
+.env
+.bundle
+
+# OS
+*.lnk
+*.db
+*.ini
+.DS_Store
+
+# Temp/cache/logs
+*.log
+*.tgz
+**/tmp
+**/cache
+**/logs
+
+# Working files/dirs
+coverage
+node_modules
+.rspec_status
+smoke-fixtures
+spec/reports
+/prior
+
+# Settings
+.vscode
+agents.md
