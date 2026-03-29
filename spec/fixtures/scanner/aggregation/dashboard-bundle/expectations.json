@@ -1,0 +1,71 @@
+{
+	"scenarios": [
+		{
+			"name": "polyfill-library-4.8.0",
+			"pattern": [
+				"app/**/*.js",
+				"ui/**/*.js",
+				"data/**/*.js"
+			],
+			"targetVersion": "4.8.0",
+			"expectedDetectedFeatures": [
+				"AbortController",
+				"DOMTokenList.prototype.forEach",
+				"Element.prototype.classList",
+				"Event.hashchange",
+				"NodeList.prototype.@@iterator",
+				"NodeList.prototype.forEach",
+				"Object.assign",
+				"Promise",
+				"Promise.allSettled",
+				"URL",
+				"URL.prototype.toJSON",
+				"fetch"
+			],
+			"expectedFeaturesByFilePath": {
+				"app/main.js": [
+					"AbortController",
+					"Promise",
+					"Promise.allSettled",
+					"fetch"
+				],
+				"data/navigation.js": [
+					"Event.hashchange",
+					"Object.assign",
+					"URL",
+					"URL.prototype.toJSON"
+				],
+				"ui/dashboard.js": [
+					"DOMTokenList.prototype.forEach",
+					"Element.prototype.classList",
+					"NodeList.prototype.@@iterator",
+					"NodeList.prototype.forEach"
+				]
+			},
+			"expectedFileCountsByFeature": {
+				"AbortController": 1,
+				"DOMTokenList.prototype.forEach": 1,
+				"Element.prototype.classList": 1,
+				"Event.hashchange": 1,
+				"NodeList.prototype.@@iterator": 1,
+				"NodeList.prototype.forEach": 1,
+				"Object.assign": 1,
+				"Promise": 1,
+				"Promise.allSettled": 1,
+				"URL": 1,
+				"URL.prototype.toJSON": 1,
+				"fetch": 1
+			},
+			"expectedManualCheckFeatures": [
+				"Element.prototype.placeholder",
+				"HTMLElement.prototype.inert",
+				"HTMLPictureElement",
+				"HTMLTemplateElement",
+				"UserTiming",
+				"WebAnimations",
+				"smoothscroll"
+			],
+			"expectedMatchedFileCount": 3
+		}
+	]
+}

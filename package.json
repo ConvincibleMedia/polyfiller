@@ -1,0 +1,55 @@
+{
+	"name": "@convinciblemedia/polyfiller",
+	"version": "0.1.0",
+	"description": "Scan JavaScript usage and emit version-aware Polyfill.io feature lists.",
+	"type": "module",
+	"author": "Convincible Media",
+	"homepage": "https://github.com/ConvincibleMedia/polyfiller#readme",
+	"bugs": {
+		"url": "https://github.com/ConvincibleMedia/polyfiller/issues"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/ConvincibleMedia/polyfiller.git"
+	},
+	"main": "./src/index.js",
+	"exports": {
+		".": "./src/index.js"
+	},
+	"bin": {
+		"polyfiller": "bin/polyfiller.js"
+	},
+	"files": [
+		"bin",
+		"src",
+		"polyfills",
+		"readme.md"
+	],
+	"engines": {
+		"node": ">=18.18"
+	},
+	"publishConfig": {
+		"access": "public"
+	},
+	"scripts": {
+		"check": "node ./bin/polyfiller.js --help",
+		"release:dry-run": "node ./scripts/publish-release.js --dry-run",
+		"release:publish": "node ./scripts/publish-release.js",
+		"test": "node ./spec/run-node-tests.js",
+		"test:coverage": "node ./spec/run-node-tests.js --coverage"
+	},
+	"keywords": [
+		"polyfill",
+		"polyfillio",
+		"polyfill.io",
+		"javascript",
+		"cli",
+		"build"
+	],
+	"license": "MIT",
+	"dependencies": {
+		"@babel/parser": "^7.27.7",
+		"@babel/traverse": "^7.27.7",
+		"fast-glob": "^3.3.3"
+	}
+}

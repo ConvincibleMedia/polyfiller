@@ -1,0 +1,50 @@
+{
+	"scenarios": [
+		{
+			"name": "polyfill-library-4.8.0",
+			"targetVersion": "4.8.0",
+			"expectedDetectedFeatures": [
+				"AbortController",
+				"Intl.RelativeTimeFormat",
+				"Object.assign",
+				"Promise",
+				"Promise.any",
+				"URL",
+				"URL.prototype.toJSON",
+				"fetch"
+			],
+			"expectedFeaturesByFilePath": {
+				"input.js": [
+					"AbortController",
+					"Intl.RelativeTimeFormat",
+					"Object.assign",
+					"Promise",
+					"Promise.any",
+					"URL",
+					"URL.prototype.toJSON",
+					"fetch"
+				]
+			},
+			"expectedFileCountsByFeature": {
+				"AbortController": 1,
+				"Intl.RelativeTimeFormat": 1,
+				"Object.assign": 1,
+				"Promise": 1,
+				"Promise.any": 1,
+				"URL": 1,
+				"URL.prototype.toJSON": 1,
+				"fetch": 1
+			},
+			"expectedManualCheckFeatures": [
+				"Element.prototype.placeholder",
+				"HTMLElement.prototype.inert",
+				"HTMLPictureElement",
+				"HTMLTemplateElement",
+				"UserTiming",
+				"WebAnimations",
+				"smoothscroll"
+			],
+			"expectedMatchedFileCount": 1
+		}
+	]
+}

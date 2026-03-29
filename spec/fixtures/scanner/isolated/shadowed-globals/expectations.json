@@ -1,0 +1,21 @@
+{
+	"scenarios": [
+		{
+			"name": "polyfill-library-4.8.0",
+			"targetVersion": "4.8.0",
+			"expectedDetectedFeatures": [],
+			"expectedFeaturesByFilePath": {},
+			"expectedFileCountsByFeature": {},
+			"expectedManualCheckFeatures": [
+				"Element.prototype.placeholder",
+				"HTMLElement.prototype.inert",
+				"HTMLPictureElement",
+				"HTMLTemplateElement",
+				"UserTiming",
+				"WebAnimations",
+				"smoothscroll"
+			],
+			"expectedMatchedFileCount": 1
+		}
+	]
+}

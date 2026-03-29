@@ -1,0 +1,47 @@
+{
+	"scenarios": [
+		{
+			"name": "polyfill-library-4.8.0",
+			"targetVersion": "4.8.0",
+			"expectedDetectedFeatures": [
+				"DOMTokenList.prototype.forEach",
+				"Element.prototype.classList",
+				"Event.focusin",
+				"Event.hashchange",
+				"NodeList.prototype.@@iterator",
+				"NodeList.prototype.forEach",
+				"String.prototype.@@iterator"
+			],
+			"expectedFeaturesByFilePath": {
+				"input.js": [
+					"DOMTokenList.prototype.forEach",
+					"Element.prototype.classList",
+					"Event.focusin",
+					"Event.hashchange",
+					"NodeList.prototype.@@iterator",
+					"NodeList.prototype.forEach",
+					"String.prototype.@@iterator"
+				]
+			},
+			"expectedFileCountsByFeature": {
+				"DOMTokenList.prototype.forEach": 1,
+				"Element.prototype.classList": 1,
+				"Event.focusin": 1,
+				"Event.hashchange": 1,
+				"NodeList.prototype.@@iterator": 1,
+				"NodeList.prototype.forEach": 1,
+				"String.prototype.@@iterator": 1
+			},
+			"expectedManualCheckFeatures": [
+				"Element.prototype.placeholder",
+				"HTMLElement.prototype.inert",
+				"HTMLPictureElement",
+				"HTMLTemplateElement",
+				"UserTiming",
+				"WebAnimations",
+				"smoothscroll"
+			],
+			"expectedMatchedFileCount": 1
+		}
+	]
+}
