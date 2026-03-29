@@ -17,7 +17,7 @@ export function renderReport({ featuresByFilePath, fileCountsByFeature, cwd }) {
 	reportLines.push('File -> polyfills');
 
 	for (const filePath of sortedFilePaths) {
-		const displayPath = path.relative(cwd, filePath) || filePath;
+		const displayPath = normaliseDisplayPath(path.relative(cwd, filePath) || filePath);
 		reportLines.push(`${displayPath}`);
 
 		for (const featureName of Array.from(featuresByFilePath.get(filePath)).sort()) {
@@ -42,19 +42,23 @@ export function renderReport({ featuresByFilePath, fileCountsByFeature, cwd }) {
 }
 
 /**
- * Render the version-specific manual-check list.
+ * Render any non-fatal warnings gathered while scanning.
  *
  * @param {object} options
- * @param {string[]} options.manualCheckFeatures
+ * @param {string[]} options.warnings
  * @returns {string}
  */
-export function renderManualCheckReport({ manualCheckFeatures }) {
-	if (manualCheckFeatures.length === 0) {
+export function renderWarnings({ warnings }) {
+	if (warnings.length === 0) {
 		return '';
 	}
 
 	return [
-		'Please check manually',
-		...manualCheckFeatures.map((featureName) => `* ${featureName}`)
+		'Warnings',
+		...warnings.map((warningMessage) => `* ${warningMessage}`)
 	].join('\n');
+}
+
+function normaliseDisplayPath(filePath) {
+	return filePath.split(path.sep).join('/');
 }

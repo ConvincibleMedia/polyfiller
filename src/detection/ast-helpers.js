@@ -56,11 +56,11 @@ export function getMemberChain(node) {
 		return null;
 	}
 
-	if (node.object.type === 'Identifier') {
+	if (node.object?.type === 'Identifier') {
 		return [node.object.name, propertyName];
 	}
 
-	if (node.object.type === 'MemberExpression' || node.object.type === 'OptionalMemberExpression') {
+	if (node.object?.type === 'MemberExpression' || node.object?.type === 'OptionalMemberExpression') {
 		const parentChain = getMemberChain(node.object);
 		return parentChain ? [...parentChain, propertyName] : null;
 	}

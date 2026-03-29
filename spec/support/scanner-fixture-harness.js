@@ -59,7 +59,7 @@ export async function runScannerFixtureScenario({ directoryPath, scenario }) {
 			featuresByFilePath: result.featuresByFilePath
 		}),
 		fileCountsByFeature: Object.fromEntries(Array.from(result.fileCountsByFeature.entries()).sort(([leftName], [rightName]) => leftName.localeCompare(rightName))),
-		manualCheckFeatures: result.manualCheckFeatures,
+		warnings: result.warnings,
 		matchedFileCount: result.matchedFileCount
 	};
 }

@@ -17,17 +17,6 @@
 				"document": 1,
 				"document.getElementsByClassName": 1
 			},
-			"expectedManualCheckFeatures": [
-				"Element.prototype.inert",
-				"Element.prototype.placeholder",
-				"HTMLPictureElement",
-				"HTMLTemplateElement",
-				"Intl.DateTimeFormat.~timeZone.all",
-				"Intl.DateTimeFormat.~timeZone.golden",
-				"UserTiming",
-				"WebAnimations",
-				"smoothscroll"
-			],
 			"expectedMatchedFileCount": 1
 		},
 		{
@@ -50,15 +39,6 @@
 				"HTMLCollection.prototype.@@iterator": 1,
 				"structuredClone": 1
 			},
-			"expectedManualCheckFeatures": [
-				"Element.prototype.placeholder",
-				"HTMLElement.prototype.inert",
-				"HTMLPictureElement",
-				"HTMLTemplateElement",
-				"UserTiming",
-				"WebAnimations",
-				"smoothscroll"
-			],
 			"expectedMatchedFileCount": 1
 		}
 	]

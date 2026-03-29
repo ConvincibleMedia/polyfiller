@@ -99,9 +99,9 @@ test('CLI prints help text without requiring a glob pattern', { concurrency: fal
 	assert.equal(result.stderr, '');
 });
 
-test('CLI emits machine-readable JSON to stdout and manual checks to stderr', { concurrency: false }, async () => {
+test('CLI emits machine-readable JSON to stdout without extra stderr noise when there are no warnings', { concurrency: false }, async () => {
 	const result = await runCli({
-		arguments: ['**/*.js', '--polyfill-version', '4.8.0'],
+		arguments: ['**/*.js', '--library-version', '4.8.0'],
 		cwd: DASHBOARD_FIXTURE_DIRECTORY
 	});
 
@@ -120,7 +120,7 @@ test('CLI emits machine-readable JSON to stdout and manual checks to stderr', { 
 		'URL.prototype.toJSON',
 		'fetch'
 	]);
-	assert.match(result.stderr, /^Please check manually/mu);
+	assert.equal(result.stderr, '');
 	assert.doesNotMatch(result.stderr, /File -> polyfills/mu);
 });
 
@@ -131,14 +131,13 @@ test('CLI can write YAML output to a file and append the human-readable report t
 	}, async (workspacePath) => {
 		const outputFilePath = path.join(workspacePath, 'reports/polyfills.yml');
 		const result = await runCli({
-			arguments: ['**/*.js', '--polyfill-library-version', '4.8.0', '--output', outputFilePath, '--report'],
+			arguments: ['**/*.js', '--library-version', '4.8.0', '--output', outputFilePath, '--report'],
 			cwd: DASHBOARD_FIXTURE_DIRECTORY
 		});
 
 		assert.equal(result.exitCode, 0);
 		assert.equal(result.stdout, '');
 		assert.match(result.stderr, /Wrote 12 detected feature\(s\)/mu);
-		assert.match(result.stderr, /^Please check manually/mu);
 		assert.match(result.stderr, /^File -> polyfills/mu);
 		assert.equal(await fs.readFile(outputFilePath, 'utf8'), [
 			'- "AbortController"',
@@ -155,6 +154,29 @@ test('CLI can write YAML output to a file and append the human-readable report t
 			'- "fetch"',
 			''
 		].join('\n'));
+	});
+});
+
+test('CLI warns and continues when the input set contains non-JavaScript and unparsable files', { concurrency: false }, async () => {
+	await withWorkspace({
+		workspaceName: 'cli-warning-behaviour',
+		filesByRelativePath: {
+			'input/app.js': 'AbortController;\n',
+			'input/template.html': '<section>Not JavaScript</section>\n',
+			'input/broken.js': 'const broken = ;\n',
+			'polyfills/4.8.0.txt': 'AbortController\n'
+		}
+	}, async (workspacePath) => {
+		const result = await runCli({
+			arguments: ['input/**/*', '--library-version', '4.8.0'],
+			cwd: workspacePath
+		});
+
+		assert.equal(result.exitCode, 0);
+		assert.deepEqual(parseJsonArrayFromOutput(result.stdout), ['AbortController']);
+		assert.match(result.stderr, /^Warnings/mu);
+		assert.match(result.stderr, /Skipped file input\/broken\.js: Could not parse JavaScript/mu);
+		assert.match(result.stderr, /Skipped non-JavaScript file input\/template\.html\./mu);
 	});
 });
 

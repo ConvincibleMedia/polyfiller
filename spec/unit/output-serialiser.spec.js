@@ -9,7 +9,10 @@ test('resolveOutputFormat prefers the explicitly requested format', () => {
 	}), 'yml');
 });
 
-test('resolveOutputFormat infers YAML from the output extension and defaults to JSON otherwise', () => {
+test('resolveOutputFormat infers the output format from the file extension and defaults to JSON otherwise', () => {
+	assert.equal(resolveOutputFormat({
+		outputFilePath: 'build/features.json'
+	}), 'json');
 	assert.equal(resolveOutputFormat({
 		outputFilePath: 'build/features.yml'
 	}), 'yml');

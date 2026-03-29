@@ -20,7 +20,7 @@ export function parseCliArguments(argv) {
 		targetVersion: undefined,
 		report: false,
 		help: false,
-		version: false
+		versionRequested: false
 	};
 
 	for (let index = 0; index < argv.length; index += 1) {
@@ -32,7 +32,7 @@ export function parseCliArguments(argv) {
 		}
 
 		if (argument === '--version') {
-			options.version = true;
+			options.versionRequested = true;
 			continue;
 		}
 
@@ -53,7 +53,7 @@ export function parseCliArguments(argv) {
 			continue;
 		}
 
-		if (argument === '--polyfill-version' || argument === '--polyfill-library-version') {
+		if (argument === '--library-version') {
 			options.targetVersion = readOptionValue({ argv, optionName: argument, nextIndex: index + 1 });
 			index += 1;
 			continue;
@@ -64,6 +64,10 @@ export function parseCliArguments(argv) {
 		}
 
 		positionalArguments.push(argument);
+	}
+
+	if (positionalArguments.length > 1) {
+		throw new Error(`Only one JavaScript glob pattern is supported. Received: ${positionalArguments.join(', ')}`);
 	}
 
 	return {
@@ -88,9 +92,8 @@ export function renderHelp({ executableName }) {
 		'',
 		'Options:',
 		'  --output, -o <path>                    Write the detected feature array to a file',
-		'  --format, -f <json|yml|yaml>           Output format; defaults to JSON unless the output extension implies YAML',
-		'  --polyfill-version <version>           Target a specific polyfill-library version; defaults to the latest supported version',
-		'  --polyfill-library-version <version>   American-English alias for --polyfill-version',
+		'  --format, -f <json|yml|yaml>           Output format; defaults to the output path extension, then JSON',
+		'  --library-version <version>            Target a specific polyfill-library version; defaults to the latest supported version',
 		'  --report                               Print file -> polyfills and polyfill -> file count breakdowns to stderr',
 		'  --help, -h                             Show this help text',
 		'  --version                              Print the CLI package version'

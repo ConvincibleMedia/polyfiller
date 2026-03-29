@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { compareSemver } from '../support/semver.js';
 
 const DEFAULT_POLYFILL_DIRECTORY = fileURLToPath(new URL('../../polyfills', import.meta.url));
+const VERSION_FILE_NAME_PATTERN = /^\d+\.\d+\.\d+\.txt$/u;
 
 /**
  * Load and normalise the supported versioned polyfill lists from disk.
@@ -87,7 +88,7 @@ export class VersionedPolyfillRegistry {
 		const directoryEntries = await fs.readdir(this.polyfillDirectory, { withFileTypes: true });
 
 		return directoryEntries
-			.filter((entry) => entry.isFile() && entry.name.endsWith('.txt'))
+			.filter((entry) => entry.isFile() && VERSION_FILE_NAME_PATTERN.test(entry.name))
 			.map((entry) => entry.name.replace(/\.txt$/u, ''))
 			.sort(compareSemver);
 	}

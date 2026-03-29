@@ -12,8 +12,9 @@ export function resolveOutputFormat({ requestedFormat, outputFilePath }) {
 		return normaliseOutputFormat(requestedFormat);
 	}
 
-	if (outputFilePath && /\.ya?ml$/iu.test(outputFilePath)) {
-		return 'yml';
+	const inferredOutputFormat = inferOutputFormatFromFilePath(outputFilePath);
+	if (inferredOutputFormat) {
+		return inferredOutputFormat;
 	}
 
 	return 'json';
@@ -37,6 +38,22 @@ export function serialiseFeatures({ features, format }) {
 }
 
 export const serializeFeatures = serialiseFeatures;
+
+function inferOutputFormatFromFilePath(outputFilePath) {
+	if (!outputFilePath) {
+		return null;
+	}
+
+	if (/\.json$/iu.test(outputFilePath)) {
+		return 'json';
+	}
+
+	if (/\.ya?ml$/iu.test(outputFilePath)) {
+		return 'yml';
+	}
+
+	return null;
+}
 
 function normaliseOutputFormat(format) {
 	const lowerCaseFormat = format.toLowerCase();

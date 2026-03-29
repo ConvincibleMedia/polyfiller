@@ -232,3 +232,26 @@ test('JavaScriptFileAnalyser detects async and iterator syntax features from rea
 		'TypedArray.prototype.@@iterator'
 	]);
 });
+
+test('JavaScriptFileAnalyser rejects unparsable input so callers can warn and skip cleanly', async () => {
+	const analyser = await createAnalyser();
+
+	assert.throws(() => analyser.analyseFile({
+		filePath: '/virtual/recovery-mode.js',
+		sourceText: 'const headingNodes = ;'
+	}), /Could not parse JavaScript/);
+});
+
+test('JavaScriptFileAnalyser tolerates uninitialised bindings that later receive member lookups', async () => {
+	const detectedFeatureNames = await detectFeatureNames({
+		filePath: '/virtual/uninitialised-bindings.js',
+		sourceText: [
+			'var detachedRange;',
+			'if (typeof detachedRange.detach === "function") {',
+			'\tdetachedRange.detach();',
+			'}'
+		].join('\n')
+	});
+
+	assert.deepEqual(detectedFeatureNames, []);
+});

@@ -23,7 +23,7 @@ function withProcessState({ argv, processArgv = ['/usr/bin/node', '/workspace/bi
 
 test('parseCliArguments normalises the supported options', () => {
 	withProcessState({
-		argv: ['src/**/*.js', '--output', 'build/polyfills.yml', '--format', 'yaml', '--polyfill-library-version', '4.8.0', '--report']
+		argv: ['src/**/*.js', '--output', 'build/polyfills.yml', '--format', 'yaml', '--library-version', '4.8.0', '--report']
 	}, (command) => {
 		assert.equal(command.pattern, 'src/**/*.js');
 		assert.equal(command.outputFilePath, 'build/polyfills.yml');
@@ -31,18 +31,18 @@ test('parseCliArguments normalises the supported options', () => {
 		assert.equal(command.targetVersion, '4.8.0');
 		assert.equal(command.report, true);
 		assert.equal(command.help, false);
-		assert.equal(command.version, false);
+		assert.equal(command.versionRequested, false);
 		assert.equal(command.executableName, 'polyfiller');
 		assert.equal(command.cwd, process.cwd());
 	});
 });
 
-test('parseCliArguments recognises help and version without needing a pattern', () => {
+test('parseCliArguments recognises help and package version without needing a pattern', () => {
 	withProcessState({
 		argv: ['--help', '--version']
 	}, (command) => {
 		assert.equal(command.help, true);
-		assert.equal(command.version, true);
+		assert.equal(command.versionRequested, true);
 		assert.equal(command.pattern, undefined);
 	});
 });
@@ -54,9 +54,12 @@ test('parseCliArguments rejects unknown options and missing values', () => {
 	assert.throws(() => withProcessState({
 		argv: ['src/**/*.js', '--output']
 	}, () => {}), /requires a value/);
+	assert.throws(() => withProcessState({
+		argv: ['src/**/*.js', 'src/**/*.mjs']
+	}, () => {}), /Only one JavaScript glob pattern is supported/);
 });
 
-test('renderHelp includes the main options and aliases', () => {
-	assert.match(renderHelp({ executableName: 'polyfiller' }), /--polyfill-library-version/);
+test('renderHelp includes the main options and updated version flags', () => {
+	assert.match(renderHelp({ executableName: 'polyfiller' }), /--library-version/);
 	assert.match(renderHelp({ executableName: 'polyfiller' }), /^Usage: polyfiller/mu);
 });

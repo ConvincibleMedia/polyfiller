@@ -39,6 +39,22 @@ test('VersionedPolyfillRegistry trims, de-duplicates, sorts, and caches a versio
 	});
 });
 
+test('VersionedPolyfillRegistry ignores non-version text files in the polyfill directory', async () => {
+	await withWorkspace({
+		workspaceName: 'versioned-polyfill-registry-non-version-files',
+		filesByRelativePath: {
+			'polyfills/4.8.0.txt': 'URL\n',
+			'polyfills/notes.txt': 'This is not a polyfill version list.\n'
+		}
+	}, async (workspacePath) => {
+		const registry = new VersionedPolyfillRegistry({
+			polyfillDirectory: `${workspacePath}/polyfills`
+		});
+
+		assert.deepEqual(await registry.listVersions(), ['4.8.0']);
+	});
+});
+
 test('VersionedPolyfillRegistry rejects unsupported versions', async () => {
 	await withWorkspace({
 		workspaceName: 'versioned-polyfill-registry-unsupported-version',

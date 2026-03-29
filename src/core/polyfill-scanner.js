@@ -2,12 +2,12 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import fastGlobModule from 'fast-glob';
 import { JavaScriptFileAnalyser } from '../detection/javascript-file-analyser.js';
-import { DETECTABLE_FEATURE_NAMES, EXACT_CHAIN_FEATURE_DEFINITIONS, GLOBAL_IDENTIFIER_FEATURE_DEFINITIONS, INSTANCE_MEMBER_FEATURE_DEFINITIONS, ITERATION_SYNTAX_FEATURE_DEFINITIONS } from '../detection/feature-catalogue.js';
-import { MANUAL_FEATURE_NAMES } from '../detection/manual-feature-catalogue.js';
+import { EXACT_CHAIN_FEATURE_DEFINITIONS, GLOBAL_IDENTIFIER_FEATURE_DEFINITIONS, INSTANCE_MEMBER_FEATURE_DEFINITIONS, ITERATION_SYNTAX_FEATURE_DEFINITIONS } from '../detection/feature-catalogue.js';
 import { VersionedPolyfillRegistry } from './versioned-polyfill-registry.js';
 
 const fastGlob = fastGlobModule.default ?? fastGlobModule;
 const DEFAULT_IGNORE_PATTERNS = ['**/old/**', '**/test/**', '**/tmp/**'];
+const JAVASCRIPT_FILE_EXTENSIONS = new Set(['.cjs', '.js', '.jsx', '.mjs']);
 
 /**
  * Coordinate version loading, file discovery, AST analysis, and result aggregation.
@@ -49,14 +49,6 @@ export class PolyfillScanner {
 	async analyse({ cwd, pattern, targetVersion }) {
 		const versionData = await this.registry.getVersionData({ targetVersion });
 		const availableFeatureNames = new Set(versionData.availableFeatures);
-		const manualCheckFeatures = versionData.availableFeatures.filter((featureName) => MANUAL_FEATURE_NAMES.has(featureName)).sort();
-		const undetectedFeatureNames = versionData.availableFeatures
-			.filter((featureName) => !MANUAL_FEATURE_NAMES.has(featureName))
-			.filter((featureName) => !DETECTABLE_FEATURE_NAMES.has(featureName));
-
-		if (undetectedFeatureNames.length > 0) {
-			throw new Error(`The feature catalogue does not cover these polyfills for ${versionData.targetVersion}: ${undetectedFeatureNames.join(', ')}`);
-		}
 
 		const patternList = Array.isArray(pattern) ? pattern : [pattern];
 		const absolutePatternList = patternList.map((currentPattern) => path.resolve(cwd, currentPattern));
@@ -82,19 +74,22 @@ export class PolyfillScanner {
 		const detectedFeatureNames = new Set();
 		const featuresByFilePath = new Map();
 		const fileCountsByFeature = new Map();
+		const warnings = [];
 
 		for (const filePath of filePaths.sort()) {
-			const sourceText = await fs.readFile(filePath, 'utf8');
-			const analyser = new JavaScriptFileAnalyser({
+			const fileAnalysis = await this.#analyseFile({
 				availableFeatureNames,
-				featureByExactChain: this.featureByExactChain,
-				featuresByGlobalRuntimeName: this.featuresByGlobalRuntimeName,
-				instanceDefinitionsByPropertyName: this.instanceDefinitionsByPropertyName,
-				iterationSyntaxDefinitions: this.iterationSyntaxDefinitions
+				cwd,
+				filePath
 			});
-			const detectedFeaturesForFile = analyser.analyseFile({ filePath, sourceText });
 
-			if (detectedFeaturesForFile.size === 0) {
+			if (fileAnalysis.warning) {
+				warnings.push(fileAnalysis.warning);
+			}
+
+			const detectedFeaturesForFile = fileAnalysis.detectedFeatures;
+
+			if (!detectedFeaturesForFile || detectedFeaturesForFile.size === 0) {
 				continue;
 			}
 
@@ -110,9 +105,52 @@ export class PolyfillScanner {
 			detectedFeatures: Array.from(detectedFeatureNames).sort(),
 			featuresByFilePath,
 			fileCountsByFeature,
-			manualCheckFeatures,
+			warnings,
 			matchedFileCount: filePaths.length
 		};
+	}
+
+	/**
+	 * Analyse one matched file in isolation so a single bad input does not abort the whole scan.
+	 *
+	 * @param {object} options
+	 * @param {Set<string>} options.availableFeatureNames
+	 * @param {string} options.cwd
+	 * @param {string} options.filePath
+	 * @returns {Promise<{ detectedFeatures: Set<string> | null, warning: string | null }>}
+	 */
+	async #analyseFile({ availableFeatureNames, cwd, filePath }) {
+		const displayFilePath = getDisplayFilePath({ cwd, filePath });
+		const fileExtension = path.extname(filePath).toLowerCase();
+
+		if (fileExtension && !JAVASCRIPT_FILE_EXTENSIONS.has(fileExtension)) {
+			return {
+				detectedFeatures: null,
+				warning: `Skipped non-JavaScript file ${displayFilePath}.`
+			};
+		}
+
+		try {
+			const sourceText = await fs.readFile(filePath, 'utf8');
+			const analyser = new JavaScriptFileAnalyser({
+				availableFeatureNames,
+				featureByExactChain: this.featureByExactChain,
+				featuresByGlobalRuntimeName: this.featuresByGlobalRuntimeName,
+				instanceDefinitionsByPropertyName: this.instanceDefinitionsByPropertyName,
+				iterationSyntaxDefinitions: this.iterationSyntaxDefinitions
+			});
+
+			return {
+				detectedFeatures: analyser.analyseFile({ filePath, sourceText }),
+				warning: null
+			};
+		} catch (error) {
+			const message = error instanceof Error ? error.message : String(error);
+			return {
+				detectedFeatures: null,
+				warning: `Skipped file ${displayFilePath}: ${message}`
+			};
+		}
 	}
 }
 
@@ -131,4 +169,8 @@ export const analyzePolyfills = analysePolyfills;
 
 function normaliseGlobSeparators(pattern) {
 	return pattern.split(path.sep).join('/');
+}
+
+function getDisplayFilePath({ cwd, filePath }) {
+	return normaliseGlobSeparators(path.relative(cwd, filePath) || filePath);
 }

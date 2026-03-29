@@ -32,15 +32,6 @@
 				"NodeList.prototype.forEach": 1,
 				"String.prototype.@@iterator": 1
 			},
-			"expectedManualCheckFeatures": [
-				"Element.prototype.placeholder",
-				"HTMLElement.prototype.inert",
-				"HTMLPictureElement",
-				"HTMLTemplateElement",
-				"UserTiming",
-				"WebAnimations",
-				"smoothscroll"
-			],
 			"expectedMatchedFileCount": 1
 		}
 	]

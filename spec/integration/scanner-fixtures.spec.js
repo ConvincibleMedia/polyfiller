@@ -17,7 +17,7 @@ for (const fixtureScenario of scannerFixtureScenarios) {
 		assert.deepEqual(result.detectedFeatures, fixtureScenario.scenario.expectedDetectedFeatures);
 		assert.deepEqual(result.featuresByFilePath, fixtureScenario.scenario.expectedFeaturesByFilePath);
 		assert.deepEqual(result.fileCountsByFeature, fixtureScenario.scenario.expectedFileCountsByFeature);
-		assert.deepEqual(result.manualCheckFeatures, fixtureScenario.scenario.expectedManualCheckFeatures);
+		assert.deepEqual(result.warnings, fixtureScenario.scenario.expectedWarnings ?? []);
 		assert.equal(result.matchedFileCount, fixtureScenario.scenario.expectedMatchedFileCount);
 	});
 }

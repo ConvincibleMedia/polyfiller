@@ -46,13 +46,26 @@ export class JavaScriptFileAnalyser {
 		this.detectedFeatureNames = new Set();
 		this.typeInferrer = new ExpressionTypeInferrer();
 
-		const ast = babelParser.parse(sourceText, {
-			allowImportExportEverywhere: true,
-			allowReturnOutsideFunction: true,
-			errorRecovery: true,
-			plugins: ['jsx'],
-			sourceType: 'unambiguous'
-		});
+		let ast;
+
+		try {
+			ast = babelParser.parse(sourceText, {
+				allowImportExportEverywhere: true,
+				allowReturnOutsideFunction: true,
+				errorRecovery: true,
+				plugins: ['jsx'],
+				sourceType: 'unambiguous'
+			});
+		} catch (error) {
+			const parsingErrorMessage = error instanceof Error ? error.message : String(error);
+			throw new Error(`Could not parse JavaScript: ${parsingErrorMessage}`);
+		}
+
+		if ((ast.errors ?? []).length > 0) {
+			const firstParsingError = ast.errors[0];
+			const parsingErrorMessage = firstParsingError?.message ?? String(firstParsingError);
+			throw new Error(`Could not parse JavaScript: ${parsingErrorMessage}`);
+		}
 
 		traverse(ast, {
 			AssignmentExpression: (path) => this.#analyseAssignmentExpression(path),
@@ -161,11 +174,11 @@ export class JavaScriptFileAnalyser {
 			}
 
 			for (const propertyNode of argumentNode.properties) {
-				if (propertyNode.type !== 'ObjectProperty') {
+				if (propertyNode?.type !== 'ObjectProperty') {
 					continue;
 				}
 
-				const propertyName = propertyNode.key.type === 'Identifier' ? propertyNode.key.name : getLiteralStringValue(propertyNode.key);
+				const propertyName = propertyNode.key?.type === 'Identifier' ? propertyNode.key.name : getLiteralStringValue(propertyNode.key);
 				if (propertyName === 'cause') {
 					this.#recordFeature('Error.cause');
 					return;
@@ -193,13 +206,13 @@ export class JavaScriptFileAnalyser {
 	}
 
 	#analyseVariableDeclarator(path) {
-		if (ARRAY_PATTERN_NODE_TYPES.has(path.node.id.type) && path.node.init) {
+		if (ARRAY_PATTERN_NODE_TYPES.has(path.node.id?.type) && path.node.init) {
 			this.#recordIterationFeatures(path.get('init'));
 		}
 	}
 
 	#analyseAssignmentExpression(path) {
-		if (ARRAY_PATTERN_NODE_TYPES.has(path.node.left.type)) {
+		if (ARRAY_PATTERN_NODE_TYPES.has(path.node.left?.type)) {
 			this.#recordIterationFeatures(path.get('right'));
 		}
 	}

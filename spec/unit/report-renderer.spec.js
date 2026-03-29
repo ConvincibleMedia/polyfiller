@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import path from 'node:path';
-import { renderManualCheckReport, renderReport } from '../../src/core/report-renderer.js';
+import { renderReport, renderWarnings } from '../../src/core/report-renderer.js';
 
 test('renderReport groups features by file and by feature count', () => {
 	const cwd = path.resolve('/workspace');
@@ -36,16 +36,16 @@ test('renderReport groups features by file and by feature count', () => {
 	].join('\n'));
 });
 
-test('renderManualCheckReport returns an empty string when there is nothing to report', () => {
-	assert.equal(renderManualCheckReport({ manualCheckFeatures: [] }), '');
+test('renderWarnings returns an empty string when there is nothing to report', () => {
+	assert.equal(renderWarnings({ warnings: [] }), '');
 });
 
-test('renderManualCheckReport prints one manual-check feature per line', () => {
-	assert.equal(renderManualCheckReport({
-		manualCheckFeatures: ['HTMLPictureElement', 'smoothscroll']
+test('renderWarnings prints one warning per line', () => {
+	assert.equal(renderWarnings({
+		warnings: ['Skipped non-JavaScript file content/index.html.', 'Skipped file content/bad.js: Could not parse JavaScript: Unexpected token (1:0)']
 	}), [
-		'Please check manually',
-		'* HTMLPictureElement',
-		'* smoothscroll'
+		'Warnings',
+		'* Skipped non-JavaScript file content/index.html.',
+		'* Skipped file content/bad.js: Could not parse JavaScript: Unexpected token (1:0)'
 	].join('\n'));
 });

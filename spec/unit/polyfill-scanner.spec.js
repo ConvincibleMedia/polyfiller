@@ -28,6 +28,7 @@ test('PolyfillScanner ignores old, test, and tmp directories while scanning', as
 
 		assert.deepEqual(result.detectedFeatures, ['AbortController']);
 		assert.equal(result.matchedFileCount, 1);
+		assert.deepEqual(result.warnings, []);
 	});
 });
 
@@ -41,7 +42,7 @@ test('PolyfillScanner reports when no JavaScript files match the requested patte
 	}), /No JavaScript files matched/);
 });
 
-test('PolyfillScanner rejects version files that contain uncatalogued polyfills', async () => {
+test('PolyfillScanner ignores uncatalogued polyfills in a supported version list', async () => {
 	await withWorkspace({
 		workspaceName: 'polyfill-scanner-uncatalogued-feature',
 		filesByRelativePath: {
@@ -55,10 +56,42 @@ test('PolyfillScanner rejects version files that contain uncatalogued polyfills'
 			})
 		});
 
-		await assert.rejects(async () => scanner.analyse({
+		const result = await scanner.analyse({
 			cwd: workspacePath,
 			pattern: 'src/**/*.js',
 			targetVersion: '1.0.0'
-		}), /The feature catalogue does not cover these polyfills/);
+		});
+
+		assert.deepEqual(result.detectedFeatures, ['AbortController']);
+		assert.deepEqual(result.warnings, []);
+	});
+});
+
+test('PolyfillScanner warns and skips non-JavaScript and unparsable files while continuing with valid inputs', async () => {
+	await withWorkspace({
+		workspaceName: 'polyfill-scanner-warning-behaviour',
+		filesByRelativePath: {
+			'input/app.js': 'AbortController;\n',
+			'input/template.html': '<section>Not JavaScript</section>\n',
+			'input/broken.js': 'const broken = ;\n',
+			'polyfills/4.8.0.txt': 'AbortController\n'
+		}
+	}, async (workspacePath) => {
+		const scanner = new PolyfillScanner({
+			registry: new VersionedPolyfillRegistry({
+				polyfillDirectory: `${workspacePath}/polyfills`
+			})
+		});
+		const result = await scanner.analyse({
+			cwd: workspacePath,
+			pattern: 'input/**/*',
+			targetVersion: '4.8.0'
+		});
+
+		assert.deepEqual(result.detectedFeatures, ['AbortController']);
+		assert.equal(result.matchedFileCount, 3);
+		assert.equal(result.warnings.length, 2);
+		assert.match(result.warnings[0], /^Skipped file input\/broken\.js: Could not parse JavaScript:/u);
+		assert.equal(result.warnings[1], 'Skipped non-JavaScript file input/template.html.');
 	});
 });

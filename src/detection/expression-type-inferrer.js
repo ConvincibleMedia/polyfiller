@@ -40,6 +40,10 @@ export class ExpressionTypeInferrer {
 	}
 
 	#inferTypes(path) {
+		if (!path?.node) {
+			return new Set();
+		}
+
 		if (this.nodeTypeCache.has(path.node)) {
 			return this.nodeTypeCache.get(path.node);
 		}
@@ -49,10 +53,14 @@ export class ExpressionTypeInferrer {
 		}
 
 		this.activeNodes.add(path.node);
-		const inferredTypes = this.#inferTypesUncached(path);
-		this.activeNodes.delete(path.node);
-		this.nodeTypeCache.set(path.node, inferredTypes);
-		return inferredTypes;
+
+		try {
+			const inferredTypes = this.#inferTypesUncached(path);
+			this.nodeTypeCache.set(path.node, inferredTypes);
+			return inferredTypes;
+		} finally {
+			this.activeNodes.delete(path.node);
+		}
 	}
 
 	#inferTypesUncached(path) {

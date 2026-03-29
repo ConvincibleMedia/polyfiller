@@ -1,6 +1,6 @@
 import { analysePolyfills } from '../core/polyfill-scanner.js';
 import { resolveOutputFormat, serialiseFeatures } from '../core/output-serialiser.js';
-import { renderManualCheckReport, renderReport } from '../core/report-renderer.js';
+import { renderReport, renderWarnings } from '../core/report-renderer.js';
 import { writeTextFile } from '../support/filesystem.js';
 import { parseCliArguments, renderHelp } from './parse-cli-arguments.js';
 
@@ -17,7 +17,7 @@ export async function runCli() {
 		return;
 	}
 
-	if (command.version) {
+	if (command.versionRequested) {
 		process.stdout.write(`${command.packageVersion}\n`);
 		return;
 	}
@@ -47,9 +47,9 @@ export async function runCli() {
 		process.stdout.write(`${serialisedFeatures}\n`);
 	}
 
-	const manualCheckReport = renderManualCheckReport({ manualCheckFeatures: analysis.manualCheckFeatures });
-	if (manualCheckReport) {
-		process.stderr.write(`${manualCheckReport}\n`);
+	const warningReport = renderWarnings({ warnings: analysis.warnings });
+	if (warningReport) {
+		process.stderr.write(`${warningReport}\n`);
 	}
 
 	if (command.report) {

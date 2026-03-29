@@ -121,15 +121,6 @@
 				"fetch": 2,
 				"matchMedia": 1
 			},
-			"expectedManualCheckFeatures": [
-				"Element.prototype.placeholder",
-				"HTMLElement.prototype.inert",
-				"HTMLPictureElement",
-				"HTMLTemplateElement",
-				"UserTiming",
-				"WebAnimations",
-				"smoothscroll"
-			],
 			"expectedMatchedFileCount": 3
 		}
 	]
